@@ -2,7 +2,7 @@
 
 Independent research project for Crypto Research / On-chain Analyst roles 
 Snapshot dates: DefiLlama figures 29 September 2026; on-chain figures 3 October 2026 
-Author: @moonlesssssss Dune dashboard: Live on-chain dashboard
+Author: @moonlesssssss Dune dashboard: [Live on-chain dashboard](https://dune.com/moonlesssssss/uniswap-market-structure)
 
 The dashboard covers:
 - cleaned daily DEX volume;
@@ -12,9 +12,7 @@ The dashboard covers:
 - leading markets;
 - top-10 transaction-sender concentration.
 
-Raw `dex.trades` data was sanity-checked for extreme USD-volume outliers.
-Confirmed anomalous pairs and transactions were excluded explicitly rather
-than removing entire chains.
+Raw dex.trades overstates Uniswap volume by up to 68% in some months. Implausible pair-months are removed with documented, rule-based exclusions (section 9.1), and every excluded pair is listed in a public table.
 
 ## TL;DR
 
