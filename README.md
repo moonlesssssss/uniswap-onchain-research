@@ -390,6 +390,10 @@ An address may be a person, smart account, router, bot, market maker or contract
 
 All DefiLlama metrics in this report are a 29 September 2026 snapshot and should be refreshed before reuse.
 
+### Exclusion rules are heuristics
+
+The exclusion table is rule-based (R1-R3) and can flag a legitimate large trade in a thin pair. See section 9.6.
+
 ---
 
 ## Repository structure
