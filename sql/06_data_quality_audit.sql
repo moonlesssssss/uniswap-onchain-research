@@ -1,46 +1,47 @@
--- Data-quality audit queries used before applying targeted exclusions.
+-- 06_data_quality_audit.sql
+-- 12-month screen on RAW dex.trades (no exclusions applied): pair-months with >= $100M volume
+-- that have few transactions, few senders, or a multi-million median trade.
+-- This is the evidence behind rules R1-R3 in 00_excluded_pair_months.sql.
+-- already_excluded = the three pairs removed manually in the first version of the project.
 
--- 1) Largest transaction-level raw volumes over 90 days.
-WITH tx_level AS (
+WITH t AS (
     SELECT
-        date_trunc('day', block_time) AS day,
+        date_trunc('month', block_time) AS month,
         blockchain,
-        version,
         token_pair,
+        version,
+        amount_usd,
         tx_hash,
-        COUNT(*) AS trade_legs,
-        SUM(amount_usd) AS summed_leg_volume_usd,
-        MAX(amount_usd) AS largest_leg_usd
+        tx_from
     FROM dex.trades
     WHERE project = 'uniswap'
       AND amount_usd IS NOT NULL
-      AND block_time >= current_timestamp - INTERVAL '90' DAY
+      AND token_pair IS NOT NULL
+      AND block_time >= date_trunc('month', current_timestamp) - INTERVAL '12' MONTH
       AND block_time < date_trunc('day', current_timestamp)
-    GROUP BY 1, 2, 3, 4, 5
 )
-SELECT *
-FROM tx_level
-ORDER BY summed_leg_volume_usd DESC
+SELECT
+    month,
+    blockchain,
+    token_pair,
+    version,
+    ROUND(SUM(amount_usd) / 1e9, 3) AS volume_usd_bn,
+    COUNT(DISTINCT tx_hash) AS transactions,
+    COUNT(DISTINCT tx_from) AS active_senders,
+    ROUND(approx_percentile(amount_usd, 0.5), 0) AS median_usd,
+    ROUND(MAX(amount_usd), 0) AS max_usd,
+    ROUND(SUM(amount_usd) / COUNT(DISTINCT tx_hash), 0) AS usd_per_tx,
+    (
+        (blockchain = 'robinhood' AND token_pair IN ('AI-WETH', 'COBIE-ETH'))
+        OR (blockchain = 'ethereum' AND token_pair = 'MAHC-WETH')
+    ) AS already_excluded
+FROM t
+GROUP BY 1, 2, 3, 4
+HAVING SUM(amount_usd) >= 1e8
+   AND (
+        COUNT(DISTINCT tx_hash) <= 2000
+        OR COUNT(DISTINCT tx_from) <= 20
+        OR approx_percentile(amount_usd, 0.5) >= 500000
+   )
+ORDER BY SUM(amount_usd) DESC
 LIMIT 100;
-
--- 2) Pair-level audit template.
--- Run separately when investigating a suspicious chain or market.
--- SELECT
---     version,
---     token_pair,
---     SUM(amount_usd) AS volume_usd,
---     COUNT(*) AS trade_legs,
---     COUNT(DISTINCT tx_hash) AS transactions,
---     COUNT(DISTINCT tx_from) AS active_senders,
---     AVG(amount_usd) AS avg_leg_usd,
---     approx_percentile(amount_usd, 0.5) AS median_leg_usd,
---     approx_percentile(amount_usd, 0.99) AS p99_leg_usd,
---     MAX(amount_usd) AS max_leg_usd
--- FROM dex.trades
--- WHERE project = 'uniswap'
---   AND blockchain = 'robinhood'
---   AND block_time >= current_timestamp - INTERVAL '30' DAY
---   AND block_time < date_trunc('day', current_timestamp)
--- GROUP BY 1, 2
--- ORDER BY volume_usd DESC
--- LIMIT 50;
