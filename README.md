@@ -1,9 +1,8 @@
 # Uniswap: From AMM to Programmable Liquidity Layer
 
-> Independent research project for Crypto Research / On-chain Analyst roles  
-> Snapshot date: **30 September 2026**  
-> Author: **@moonlesssssss**  
-> Dune dashboard: **[Live on-chain dashboard](https://dune.com/moonlesssssss/uniswap-market-structure)**
+Independent research project for Crypto Research / On-chain Analyst roles 
+Snapshot dates: DefiLlama figures 29 September 2026; on-chain figures 3 October 2026 
+Author: @moonlesssssss Dune dashboard: Live on-chain dashboard
 
 The dashboard covers:
 - cleaned daily DEX volume;
