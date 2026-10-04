@@ -247,7 +247,6 @@ Volume, active-address and TVL metrics can be distorted by bots, smart-wallet ar
 
 ---
 
-## 9. On-chain findings
 
 ## 9. On-chain findings
 
